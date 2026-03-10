@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flow #4 — Mekanisme Coaching RO</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:       #0e1a2b;
+  --ink-mid:   #1a2e45;
+  --ink-soft:  #243d5c;
+  --blue:      #1a6dd4;
+  --blue-lt:   #dbeafe;
+  --green:     #047857;
+  --green-bg:  #d1fae5;
+  --green-acc: #6ee7b7;
+  --yellow:    #b45309;
+  --yellow-bg: #fef3c7;
+  --yellow-acc:#fcd34d;
+  --red:       #b91c1c;
+  --red-bg:    #fee2e2;
+  --red-acc:   #fca5a5;
+  --over:      #9f1239;
+  --over-bg:   #fff1f2;
+  --over-acc:  #fecdd3;
+  --slate:     #334155;
+  --muted:     #64748b;
+  --border:    #e2e8f0;
+  --bg:        #f0f4f8;
+  --white:     #ffffff;
+  --mono: 'JetBrains Mono', monospace;
+  --sans: 'Sora', sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--slate);
+  min-height: 100vh;
+}
+
+/* ── HEADER ── */
+.header {
+  background: var(--ink);
+  padding: 28px 48px 26px;
+  border-bottom: 3px solid var(--blue);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 32px;
+  position: relative;
+  overflow: hidden;
+}
+.header::before {
+  content: '';
+  position: absolute;
+  right: -60px; top: -60px;
+  width: 260px; height: 260px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(26,109,212,.18) 0%, transparent 70%);
+  pointer-events: none;
+}
+.h-tag  { font-family: var(--mono); font-size: 10px; color: #60a5fa; letter-spacing: 2.5px; text-transform: uppercase; margin-bottom: 10px; }
+.h-title{ font-size: 21px; font-weight: 800; color: #fff; line-height: 1.3; }
+.h-sub  { font-size: 12.5px; color: #94a3b8; margin-top: 6px; font-weight: 300; }
+.h-right{ display:flex; flex-direction:column; gap:6px; align-items:flex-end; flex-shrink:0; }
+.badge  { font-family: var(--mono); font-size:10px; padding:4px 11px; border-radius:4px; letter-spacing:1px; white-space:nowrap; }
+.b-blue { background:#1e3a5f; color:#93c5fd; border:1px solid #1d4ed8; }
+.b-gray { background:#111f33; color:#94a3b8; border:1px solid #374151; }
+
+/* ── TABS ── */
+.tabs { background: var(--white); border-bottom: 2px solid var(--border); display: flex; padding: 0 48px; }
+.tab  {
+  padding: 13px 22px; font-size: 12.5px; font-weight: 600;
+  color: var(--muted); cursor: pointer;
+  border-bottom: 3px solid transparent; margin-bottom: -2px;
+  transition: all .18s; white-space: nowrap;
+}
+.tab:hover { color: var(--blue); }
+.tab.active { color: var(--ink); border-bottom-color: var(--blue); }
+
+/* ── CONTENT ── */
+.content { display: none; }
+.content.active { display: block; }
+.pad { padding: 36px 48px 60px; }
+
+.sec-title { font-size: 14px; font-weight: 700; color: var(--ink); margin-bottom: 5px; }
+.sec-sub   { font-size: 12px; color: var(--muted); margin-bottom: 28px; line-height: 1.65; }
+
+/* ────────────────────────────────────
+   FLOW CANVAS — Tab 1
+──────────────────────────────────── */
+.flow-canvas {
+  display: flex;
+  gap: 32px;
+  align-items: flex-start;
+  max-width: 1100px;
+}
+
+/* ── LEFT: Trigger column ── */
+.trigger-col {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 220px;
+  flex-shrink: 0;
+}
+.trigger-card {
+  border-radius: 10px;
+  padding: 14px 16px;
+  border: 2px solid;
+  cursor: default;
+  transition: box-shadow .18s, transform .18s;
+}
+.trigger-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,.1); transform: translateY(-1px); }
+
+.tc-green  { background: var(--green-bg);  border-color: var(--green-acc); }
+.tc-yellow { background: var(--yellow-bg); border-color: var(--yellow-acc); }
+.tc-red    { background: var(--red-bg);    border-color: var(--red-acc); }
+.tc-over   { background: var(--over-bg);   border-color: var(--over-acc); }
+
+.tc-label {
+  font-family: var(--mono); font-size: 9.5px; font-weight: 600;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  margin-bottom: 6px; display: flex; align-items: center; gap: 6px;
+}
+.tc-green  .tc-label { color: var(--green); }
+.tc-yellow .tc-label { color: var(--yellow); }
+.tc-red    .tc-label { color: var(--red); }
+.tc-over   .tc-label { color: var(--over); }
+
+.tc-title { font-size: 12.5px; font-weight: 700; margin-bottom: 5px; }
+.tc-green  .tc-title { color: #064e3b; }
+.tc-yellow .tc-title { color: #451a03; }
+.tc-red    .tc-title { color: var(--red); }
+.tc-over   .tc-title { color: var(--over); }
+
+.tc-body { font-size: 11px; line-height: 1.65; }
+.tc-green  .tc-body { color: #065f46; }
+.tc-yellow .tc-body { color: #78350f; }
+.tc-red    .tc-body { color: #7f1d1d; }
+.tc-over   .tc-body { color: #4c0519; }
+
+.trigger-col-title {
+  font-family: var(--mono); font-size: 10px; font-weight: 600;
+  color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase;
+  padding: 6px 0; border-bottom: 2px solid var(--border);
+  margin-bottom: 4px;
+}
+
+/* ── CENTER: Flow column ── */
+.flow-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+
+.flow-col-title {
+  font-family: var(--mono); font-size: 10px; font-weight: 600;
+  color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase;
+  padding: 6px 0 8px; border-bottom: 2px solid var(--border);
+  margin-bottom: 16px; align-self: stretch; text-align: center;
+}
+
+/* node shapes */
+.node-start {
+  background: var(--ink);
+  color: white; padding: 12px 40px;
+  border-radius: 50px; font-size: 12.5px; font-weight: 700;
+  letter-spacing: .4px; box-shadow: 0 4px 14px rgba(14,26,43,.4);
+}
+.node-end {
+  color: white; padding: 12px 40px;
+  border-radius: 50px; font-size: 12.5px; font-weight: 700;
+  letter-spacing: .4px;
+}
+.ne-green  { background: linear-gradient(135deg,#065f46,#059669); box-shadow: 0 4px 14px rgba(5,150,105,.35); }
+.ne-yellow { background: linear-gradient(135deg,#92400e,#d97706); box-shadow: 0 4px 14px rgba(217,119,6,.35); }
+.ne-red    { background: linear-gradient(135deg,#7f1d1d,#dc2626); box-shadow: 0 4px 14px rgba(220,38,38,.35); }
+
+.node-proc {
+  background: #eff6ff; border: 2px solid #93c5fd;
+  border-radius: 9px; padding: 14px 20px;
+  font-size: 12px; color: #1e3a8a; text-align: center;
+  width: 100%; max-width: 460px; line-height: 1.55;
+  box-shadow: 0 2px 8px rgba(147,197,253,.2);
+}
+.node-proc .mono { font-family: var(--mono); font-size: 10.5px; background: #dbeafe; color: #1d4ed8; padding: 3px 8px; border-radius: 4px; display: inline-block; margin-top: 6px; }
+.node-proc strong { color: #1e3a8a; }
+
+/* diamond */
+.dmd {
+  border: 2.5px solid #f59e0b; background: #fffbeb;
+  transform: rotate(45deg);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 16px rgba(245,158,11,.2);
+  flex-shrink: 0;
+}
+.dmd-inner { transform: rotate(-45deg); text-align: center; padding: 6px; line-height: 1.4; }
+.dmd-inner .q     { font-size: 12px; font-weight: 700; color: #92400e; }
+.dmd-inner .q-sub { font-size: 10px; color: #b45309; font-family: var(--mono); margin-top: 3px; }
+
+/* arrow / connector */
+.vline { width: 2px; background: #94a3b8; }
+.vline-g { background: #059669; }
+.vline-y { background: #d97706; }
+.vline-r { background: #dc2626; }
+
+.arr-lbl {
+  font-size: 10.5px; font-weight: 700; padding: 3px 9px;
+  border-radius: 10px; white-space: nowrap;
+}
+.al-yes  { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+.al-no   { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+.al-gray { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+
+/* branch row */
+.br { display: flex; width: 100%; align-items: flex-start; }
+.br-side { display: flex; flex-direction: column; align-items: center; flex: 1; }
+.hline { height: 2px; background: #94a3b8; width: 100%; }
+.hline-g { background: #059669; }
+.hline-y { background: #d97706; }
+.hline-r { background: #dc2626; }
+
+/* action card inside flow */
+.act-card {
+  border-radius: 9px; padding: 14px 16px;
+  border-left: 4px solid; width: 200px;
+  font-size: 11px; line-height: 1.6;
+  box-shadow: 0 2px 10px rgba(0,0,0,.06);
+}
+.act-card .at { font-size: 12.5px; font-weight: 700; margin-bottom: 5px; }
+.ac-green  { background: var(--green-bg);  border-color: var(--green);  }
+.ac-yellow { background: var(--yellow-bg); border-color: var(--yellow); }
+.ac-red    { background: var(--red-bg);    border-color: var(--red);    }
+.ac-green  .at { color: var(--green); }
+.ac-yellow .at { color: var(--yellow); }
+.ac-red    .at { color: var(--red); }
+.ac-green  { color: #064e3b; }
+.ac-yellow { color: #78350f; }
+.ac-red    { color: #7f1d1d; }
+
+/* ── RIGHT: Timeline column ── */
+.timeline-col {
+  width: 240px;
+  flex-shrink: 0;
+}
+.timeline-col-title {
+  font-family: var(--mono); font-size: 10px; font-weight: 600;
+  color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase;
+  padding: 6px 0; border-bottom: 2px solid var(--border);
+  margin-bottom: 16px;
+}
+.tl-item {
+  display: flex; gap: 12px; align-items: flex-start;
+  margin-bottom: 16px;
+}
+.tl-dot {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: white; flex-shrink: 0;
+}
+.tl-content {}
+.tl-when { font-family: var(--mono); font-size: 10px; font-weight: 600; letter-spacing:.5px; margin-bottom: 4px; }
+.tl-title { font-size: 12px; font-weight: 700; color: var(--ink); margin-bottom: 3px; }
+.tl-desc  { font-size: 11px; color: var(--muted); line-height: 1.6; }
+.tl-line  { width: 2px; height: 14px; background: #e2e8f0; margin-left: 15px; }
+
+/* ────────────────────────────────────
+   TAB 2 — KATEGORI COACHING HO
+──────────────────────────────────── */
+.cat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  max-width: 900px;
+  margin-bottom: 32px;
+}
+.cat-card {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 3px 14px rgba(0,0,0,.07);
+}
+.cat-hdr {
+  padding: 16px 20px;
+  display: flex; gap: 12px; align-items: center;
+}
+.cat-icon { font-size: 26px; }
+.cat-hdr-text {}
+.cat-hdr-label { font-family: var(--mono); font-size: 9.5px; font-weight: 600; letter-spacing: 1.5px; opacity: .8; margin-bottom: 3px; }
+.cat-hdr-title { font-size: 15px; font-weight: 800; }
+.cat-body { padding: 16px 20px; background: white; }
+.cat-row { display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; border-bottom: 1px solid #f1f5f9; }
+.cat-row:last-child { border-bottom: none; }
+.cat-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+.cat-row-text { font-size: 11.5px; color: var(--slate); line-height: 1.6; }
+.cat-row-text strong { color: var(--ink); }
+.cat-consequence {
+  margin-top: 12px; padding: 10px 12px;
+  border-radius: 7px; font-size: 11px; font-weight: 600; line-height: 1.6;
+}
+
+/* Merah */
+.cat-merah .cat-hdr { background: #7f1d1d; color: white; }
+.cat-merah .cat-dot { background: #dc2626; }
+.cat-merah .cat-consequence { background: #fee2e2; color: #7f1d1d; }
+
+/* Kuning */
+.cat-kuning .cat-hdr { background: #78350f; color: white; }
+.cat-kuning .cat-dot { background: #d97706; }
+.cat-kuning .cat-consequence { background: #fef3c7; color: #78350f; }
+
+/* Hijau */
+.cat-hijau .cat-hdr { background: #064e3b; color: white; }
+.cat-hijau .cat-dot { background: #059669; }
+.cat-hijau .cat-consequence { background: #d1fae5; color: #064e3b; }
+
+/* ────────────────────────────────────
+   TAB 3 — PANDUAN SPV
+──────────────────────────────────── */
+.guide-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  max-width: 960px;
+}
+.guide-card {
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0,0,0,.05);
+}
+.guide-hdr {
+  padding: 13px 18px;
+  font-size: 13px; font-weight: 700; color: white;
+  display: flex; align-items: center; gap: 10px;
+}
+.guide-body { padding: 16px 18px; }
+.guide-step {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 10px 0; border-bottom: 1px solid #f1f5f9;
+}
+.guide-step:last-child { border-bottom: none; }
+.gs-num {
+  width: 24px; height: 24px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: white; flex-shrink: 0;
+}
+.gs-text {}
+.gs-title { font-size: 12px; font-weight: 700; color: var(--ink); margin-bottom: 3px; }
+.gs-desc  { font-size: 11px; color: var(--muted); line-height: 1.6; }
+
+/* 5 blok pertanyaan */
+.q-blocks {
+  display: flex; flex-direction: column; gap: 10px;
+  margin-top: 0;
+}
+.q-block {
+  background: #f8fafc; border: 1.5px solid #e2e8f0;
+  border-radius: 8px; padding: 12px 14px;
+  display: flex; gap: 12px; align-items: flex-start;
+}
+.q-num {
+  font-family: var(--mono); font-size: 11px; font-weight: 700;
+  color: var(--blue); flex-shrink: 0; margin-top: 1px;
+  width: 24px;
+}
+.q-content {}
+.q-title { font-size: 12px; font-weight: 700; color: var(--ink); margin-bottom: 4px; }
+.q-detail { font-size: 11px; color: var(--muted); line-height: 1.6; }
+.q-probe  { font-size: 10.5px; color: var(--blue); font-style: italic; margin-top: 4px; }
+
+/* ── CALLOUT ── */
+.callout {
+  border-radius: 10px; padding: 14px 18px;
+  display: flex; gap: 12px; align-items: flex-start;
+  margin-bottom: 20px;
+}
+.c-warn  { background:#fff7ed; border:1.5px solid #fb923c; border-left:5px solid #ea580c; }
+.c-info  { background:#eff6ff; border:1.5px solid #93c5fd; border-left:5px solid #2563eb; }
+.c-green { background:#f0fdf4; border:1.5px solid #6ee7b7; border-left:5px solid #059669; }
+.c-red   { background:#fff1f2; border:1.5px solid #fecdd3; border-left:5px solid #be123c; }
+.callout-icon  { font-size:16px; flex-shrink:0; margin-top:1px; }
+.callout-title { font-size:12.5px; font-weight:700; margin-bottom:5px; }
+.c-warn  .callout-title { color:#c2410c; }
+.c-info  .callout-title { color:#1d4ed8; }
+.c-green .callout-title { color:#065f46; }
+.c-red   .callout-title { color:#9f1239; }
+.callout-text  { font-size:11.5px; line-height:1.7; }
+.c-warn  .callout-text { color:#7c2d12; }
+.c-info  .callout-text { color:#1e3a5f; }
+.c-green .callout-text { color:#064e3b; }
+.c-red   .callout-text { color:#4c0519; }
+
+/* misc */
+.divider { height:1px; background:linear-gradient(90deg,transparent,#d1d5db,transparent); margin:28px 0; }
+.sp8  { height:8px; }
+.sp12 { height:12px; }
+.sp16 { height:16px; }
+.sp20 { height:20px; }
+.sp24 { height:24px; }
+.fc   { display:flex; flex-direction:column; align-items:center; }
+
+/* FOOTER */
+.footer {
+  background: var(--ink); padding:14px 48px;
+  display:flex; justify-content:space-between;
+  font-size:11px; color:#64748b;
+}
+.footer span { font-family: var(--mono); }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div>
+    <div class="h-tag">Flow #4 of 5 · Juknis KPI RO 2026</div>
+    <div class="h-title">Mekanisme Coaching — Dari Zona ke Tindakan</div>
+    <div class="h-sub">Bank Woori Saudara · Divisi Bisnis Pensiun & Divisi Consumer · Berlaku April 2026</div>
+  </div>
+  <div class="h-right">
+    <span class="badge b-blue">LINEAR FLOW + KATEGORI HO</span>
+    <span class="badge b-gray">Rujukan: Bab V.1 – V.3 · V.5</span>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <div class="tab active" onclick="switchTab(0)">① Alur Coaching per Zona</div>
+  <div class="tab" onclick="switchTab(1)">② Kategori Kualitas Coaching (HO)</div>
+  <div class="tab" onclick="switchTab(2)">③ Panduan Pelaksanaan SPV</div>
+</div>
+
+<!-- ══════════════════════════
+     TAB 1 — ALUR COACHING
+══════════════════════════ -->
+<div class="content active pad" id="tab0">
+
+  <div class="sec-title">Alur Coaching — Zona Ditetapkan HO → Tindakan SPV</div>
+  <div class="sec-sub">Setiap zona menghasilkan kewajiban tindakan yang berbeda. Baca dari tengah (alur keputusan), lalu lihat ke kiri (kondisi awal) dan kanan (timeline wajib).</div>
+
+  <div class="flow-canvas">
+
+    <!-- ── KIRI: TRIGGER ── -->
+    <div class="trigger-col">
+      <div class="trigger-col-title">Kondisi Awal</div>
+
+      <div class="trigger-card tc-green">
+        <div class="tc-label">🟢 Trigger #1</div>
+        <div class="tc-title">Green Zone</div>
+        <div class="tc-body">Skor total ≥ 80 dan Skor C ≥ 50. Kinerja on track. Tidak ada coaching wajib bulan ini.</div>
+      </div>
+
+      <div class="trigger-card tc-yellow">
+        <div class="tc-label">🟡 Trigger #2a</div>
+        <div class="tc-title">Yellow Zone — Skor Rendah</div>
+        <div class="tc-body">Skor total 60–79. Perlu perhatian. Coaching terarah oleh SPV wajib dilakukan.</div>
+      </div>
+
+      <div class="trigger-card tc-yellow" style="border-color:#f59e0b;">
+        <div class="tc-label" style="color:#b45309;">🟡 Trigger #2b</div>
+        <div class="tc-title">Yellow Zone — KPI Ops Rendah</div>
+        <div class="tc-body">Skor total ≥ 80 (Green secara total) TAPI skor salah satu sub-KPI Operasional &lt; 70%. Tetap wajib coaching Yellow meskipun total aman.</div>
+      </div>
+
+      <div class="trigger-card tc-red">
+        <div class="tc-label">🔴 Trigger #3</div>
+        <div class="tc-title">Red Zone</div>
+        <div class="tc-body">Skor total &lt; 60. Intervensi segera. Coaching wajib + RTL Tertulis ditandatangani RO dan SPV.</div>
+      </div>
+
+      <div class="trigger-card tc-over">
+        <div class="tc-label" style="color:var(--over);">🔴 Trigger #4</div>
+        <div class="tc-title">Override (Skor C &lt; 50)</div>
+        <div class="tc-body">Meskipun skor total berapapun — jika Skor C &lt; 50, zona otomatis Red. Tindakan sama dengan Red Zone: coaching wajib + RTL Tertulis.</div>
+      </div>
+    </div>
+
+    <!-- ── TENGAH: FLOW ── -->
+    <div class="flow-col">
+      <div class="flow-col-title">Alur Keputusan Tindakan</div>
+
+      <div class="node-start">HO Menerbitkan Zona Final</div>
+      <div class="fc sp16"><div class="vline" style="height:20px;"></div></div>
+
+      <!-- Decision 1: Green? -->
+      <div class="dmd" style="width:120px;height:120px;">
+        <div class="dmd-inner">
+          <div class="q">Green Zone?</div>
+          <div class="q-sub">Skor ≥ 80<br>+ Skor C ≥ 50</div>
+        </div>
+      </div>
+
+      <!-- Branch: Green YES -->
+      <div class="br" style="max-width:500px; margin:0 auto;">
+        <div class="br-side" style="align-items:flex-end;">
+          <div class="hline hline-g" style="margin-top:60px;"></div>
+          <div class="vline vline-g" style="height:60px;"></div>
+          <span class="arr-lbl al-yes" style="background:#dcfce7;color:#166534;border-color:#86efac;margin-bottom:8px;">YA</span>
+          <div class="act-card ac-green">
+            <div class="at">✅ Tidak Ada Coaching Wajib</div>
+            Evaluasi rutin bulanan. SPV pantau tren skor bulan depan. Tidak ada input GForm ke HO.
+          </div>
+        </div>
+        <div style="flex-shrink:0;width:60px;display:flex;flex-direction:column;align-items:center;margin-top:60px;">
+          <span class="arr-lbl al-no" style="margin-bottom:6px;">TIDAK</span>
+          <div class="vline" style="height:8px;"></div>
+        </div>
+        <div class="br-side"></div>
+      </div>
+
+      <div class="fc"><div class="vline" style="height:8px;"></div></div>
+
+      <!-- Decision 2: KPI Ops < 70? -->
+      <div class="dmd" style="width:128px;height:128px;">
+        <div class="dmd-inner">
+          <div class="q">Ada Sub-KPI Ops&lt;70?</div>
+          <div class="q-sub">Meski total ≥ 80</div>
+        </div>
+      </div>
+
+      <!-- Branch: KPI Ops YES -->
+      <div class="br" style="max-width:500px; margin:0 auto;">
+        <div class="br-side" style="align-items:flex-end;">
+          <div class="hline hline-y" style="margin-top:64px;"></div>
+          <div class="vline vline-y" style="height:64px;"></div>
+          <span class="arr-lbl" style="background:#fef9c3;color:#713f12;border:1px solid #fcd34d;margin-bottom:8px;">YA — Yellow Parsial</span>
+          <div class="act-card ac-yellow" style="width:190px;">
+            <div class="at">⚡ Coaching Yellow (Parsial)</div>
+            Fokus pada sub-KPI yang &lt;70%. SPV telaah akar masalah spesifik. Input GForm dalam 7 hari kerja.
+          </div>
+        </div>
+        <div style="flex-shrink:0;width:60px;display:flex;flex-direction:column;align-items:center;margin-top:64px;">
+          <span class="arr-lbl al-no" style="margin-bottom:6px;">TIDAK</span>
+          <div class="vline" style="height:8px;"></div>
+        </div>
+        <div class="br-side"></div>
+      </div>
+
+      <div class="fc"><div class="vline" style="height:8px;"></div></div>
+
+      <!-- Decision 3: Yellow? -->
+      <div class="dmd" style="width:120px;height:120px;">
+        <div class="dmd-inner">
+          <div class="q">Yellow Zone?</div>
+          <div class="q-sub">Skor 60–79</div>
+        </div>
+      </div>
+
+      <!-- Branch: Yellow YES -->
+      <div class="br" style="max-width:500px; margin:0 auto;">
+        <div class="br-side" style="align-items:flex-end;">
+          <div class="hline hline-y" style="margin-top:60px;"></div>
+          <div class="vline vline-y" style="height:60px;"></div>
+          <span class="arr-lbl" style="background:#fef9c3;color:#713f12;border:1px solid #fcd34d;margin-bottom:8px;">YA</span>
+          <div class="act-card ac-yellow">
+            <div class="at">⚡ Coaching Yellow</div>
+            SPV coaching terarah dalam <strong>7 hari kerja</strong> sejak HO terbitkan zona. Input GForm HO dalam 7 hari kerja.
+          </div>
+        </div>
+        <div style="flex-shrink:0;width:60px;display:flex;flex-direction:column;align-items:center;margin-top:60px;">
+          <span class="arr-lbl al-no" style="margin-bottom:6px;">TIDAK</span>
+          <div class="vline vline-r" style="height:8px;"></div>
+        </div>
+        <div class="br-side"></div>
+      </div>
+
+      <div class="fc"><div class="vline vline-r" style="height:8px;"></div></div>
+
+      <!-- RED / OVERRIDE action -->
+      <div class="node-proc" style="border-color:#fca5a5; background:#fff5f5; color:#7f1d1d; max-width:440px;">
+        <div><strong>🔴 Red Zone atau Override</strong> — Skor &lt;60 ATAU Skor C &lt;50</div>
+        <div>Coaching Wajib + <strong>RTL Tertulis</strong> (ditandatangani RO dan SPV).</div>
+        <div class="mono" style="background:#fecaca;color:#7f1d1d;">SPV input GForm HO dalam 3 hari kerja</div>
+      </div>
+
+      <div class="fc"><div class="vline vline-r" style="height:16px;"></div></div>
+
+      <!-- Decision 4: Coaching quality Red -->
+      <div class="dmd" style="width:130px;height:130px;border-color:#dc2626;background:#fff5f5;">
+        <div class="dmd-inner">
+          <div class="q" style="color:#991b1b;">HO Kategorisasi</div>
+          <div class="q-sub" style="color:#dc2626;">Kualitas coaching?</div>
+        </div>
+      </div>
+
+      <!-- 3 outcomes -->
+      <div class="br" style="max-width:520px;margin:0 auto;">
+        <!-- LEFT: Merah -->
+        <div class="br-side" style="align-items:flex-end;">
+          <div class="hline hline-r" style="margin-top:65px;"></div>
+          <div class="vline vline-r" style="height:65px;"></div>
+          <span class="arr-lbl" style="background:#fecaca;color:#7f1d1d;border:1px solid #f87171;margin-bottom:8px;font-size:10px;">Coaching Merah</span>
+          <div style="background:#fee2e2;border:2px solid #fca5a5;border-radius:8px;padding:12px;width:160px;font-size:11px;color:#7f1d1d;">
+            <div style="font-weight:700;margin-bottom:5px;">Tidak sadar, tidak mau</div>
+            HO catat. SPV mendapat perhatian khusus dari atasan. Diperhitungkan dalam evaluasi SPV.
+          </div>
+        </div>
+        <!-- CENTER: Kuning -->
+        <div style="flex-shrink:0;width:80px;display:flex;flex-direction:column;align-items:center;margin-top:65px;">
+          <span class="arr-lbl" style="background:#fef9c3;color:#78350f;border:1px solid #fcd34d;margin-bottom:6px;font-size:10px;">Coaching Kuning</span>
+          <div class="vline vline-y" style="height:8px;"></div>
+          <div style="background:#fef3c7;border:2px solid #fcd34d;border-radius:8px;padding:12px;width:160px;font-size:11px;color:#78350f;margin-top:6px;">
+            <div style="font-weight:700;margin-bottom:5px;">Ada upaya, strategi belum tepat</div>
+            HO catat. SPV perlu evaluasi strategi coaching dengan atasan bulan depan.
+          </div>
+        </div>
+        <!-- RIGHT: Hijau -->
+        <div class="br-side" style="align-items:flex-start;">
+          <div class="hline hline-g" style="margin-top:65px;"></div>
+          <div class="vline vline-g" style="height:65px;"></div>
+          <span class="arr-lbl" style="background:#dcfce7;color:#166534;border:1px solid #86efac;margin-bottom:8px;font-size:10px;">Coaching Hijau</span>
+          <div style="background:#d1fae5;border:2px solid #6ee7b7;border-radius:8px;padding:12px;width:160px;font-size:11px;color:#065f46;">
+            <div style="font-weight:700;margin-bottom:5px;">Strategi & motivasi baik</div>
+            HO catat. Lanjut pantau perkembangan bulan depan. SPV dinilai positif.
+          </div>
+        </div>
+      </div>
+
+      <div class="fc sp20"><div class="vline" style="height:20px;"></div></div>
+      <div class="node-end ne-red">SELESAI — Hasil Coaching Terdokumentasi di HO</div>
+
+    </div>
+
+    <!-- ── KANAN: TIMELINE ── -->
+    <div class="timeline-col">
+      <div class="timeline-col-title">Timeline Wajib</div>
+
+      <div class="tl-item">
+        <div class="tl-dot" style="background:var(--ink);">📋</div>
+        <div class="tl-content">
+          <div class="tl-when" style="color:var(--muted);">TGL 23+</div>
+          <div class="tl-title">HO Terbitkan Zona Final</div>
+          <div class="tl-desc">Hasil resmi dari HO R&D Product. Zona bersifat mengikat. SPV mulai hitung timeline coaching dari tanggal ini.</div>
+        </div>
+      </div>
+      <div class="tl-line"></div>
+
+      <div class="tl-item">
+        <div class="tl-dot" style="background:#059669;">🟢</div>
+        <div class="tl-content">
+          <div class="tl-when" style="color:#059669;">GREEN — Segera</div>
+          <div class="tl-title">Tidak Ada Kewajiban</div>
+          <div class="tl-desc">Evaluasi rutin. Tidak ada input GForm ke HO. Pantau tren agar tidak turun ke Yellow bulan depan.</div>
+        </div>
+      </div>
+      <div class="tl-line"></div>
+
+      <div class="tl-item">
+        <div class="tl-dot" style="background:#d97706;">🟡</div>
+        <div class="tl-content">
+          <div class="tl-when" style="color:#d97706;">YELLOW — Maks 7 Hari Kerja</div>
+          <div class="tl-title">Coaching Terarah SPV</div>
+          <div class="tl-desc">Sesi coaching harus selesai dalam 7 hari kerja sejak zona HO diterbitkan. Fokus pada penyebab spesifik dan strategi perbaikan konkret.</div>
+        </div>
+      </div>
+      <div class="tl-line"></div>
+
+      <div class="tl-item">
+        <div class="tl-dot" style="background:#d97706;">📝</div>
+        <div class="tl-content">
+          <div class="tl-when" style="color:#d97706;">YELLOW — Maks 7 Hari Kerja</div>
+          <div class="tl-title">Input GForm ke HO</div>
+          <div class="tl-desc">Hasil coaching Yellow diinput ke Google Form HO. Deadline sama dengan sesi coaching: 7 hari kerja.</div>
+        </div>
+      </div>
+      <div class="tl-line"></div>
+
+      <div class="tl-item">
+        <div class="tl-dot" style="background:#dc2626;">🔴</div>
+        <div class="tl-content">
+          <div class="tl-when" style="color:#dc2626;">RED — Segera + Maks 3 Hari Kerja</div>
+          <div class="tl-title">Coaching Wajib + RTL Tertulis</div>
+          <div class="tl-desc">Sesi coaching harus dilakukan sesegera mungkin. RTL Tertulis ditandatangani RO dan SPV di akhir sesi.</div>
+        </div>
+      </div>
+      <div class="tl-line"></div>
+
+      <div class="tl-item">
+        <div class="tl-dot" style="background:#dc2626;">📝</div>
+        <div class="tl-content">
+          <div class="tl-when" style="color:#dc2626;">RED — Maks 3 Hari Kerja</div>
+          <div class="tl-title">Input GForm ke HO</div>
+          <div class="tl-desc">Hasil coaching Red (termasuk kategori kualitas: Merah/Kuning/Hijau) diinput ke GForm HO dalam 3 hari kerja setelah sesi coaching selesai.</div>
+        </div>
+      </div>
+      <div class="tl-line"></div>
+
+      <div class="tl-item">
+        <div class="tl-dot" style="background:#9f1239;">🏢</div>
+        <div class="tl-content">
+          <div class="tl-when" style="color:#9f1239;">HO — Setelah GForm Masuk</div>
+          <div class="tl-title">HO Kategorisasi Kualitas</div>
+          <div class="tl-desc">HO menentukan kualitas coaching: Merah, Kuning, atau Hijau. Hasilnya digunakan untuk evaluasi efektivitas SPV dan proyeksi perkembangan RO.</div>
+        </div>
+      </div>
+
+    </div>
+
+  </div><!-- end flow-canvas -->
+
+</div>
+
+<!-- ══════════════════════════
+     TAB 2 — KATEGORI HO
+══════════════════════════ -->
+<div class="content pad" id="tab1">
+
+  <div class="sec-title">Kategorisasi Kualitas Coaching oleh HO</div>
+  <div class="sec-sub">Setelah SPV menginput hasil coaching Red ke GForm, HO mengkategorikan kualitas coaching tersebut menjadi tiga level. Ini mencerminkan kondisi RO dan juga efektivitas SPV.</div>
+
+  <div class="callout c-info">
+    <div class="callout-icon">ℹ️</div>
+    <div>
+      <div class="callout-title">Kategorisasi Berlaku untuk Coaching Red Zone Saja</div>
+      <div class="callout-text">Coaching Yellow tidak dikategorisasi secara formal — cukup diinput sebagai laporan ke GForm. Kategorisasi Merah/Kuning/Hijau hanya berlaku untuk hasil coaching <strong>Red Zone</strong> (termasuk Override). Kualitas coaching ini berdampak pada penilaian kinerja SPV, bukan hanya RO.</div>
+    </div>
+  </div>
+
+  <div class="cat-grid">
+
+    <!-- MERAH -->
+    <div class="cat-card cat-merah">
+      <div class="cat-hdr">
+        <div class="cat-icon">🔴</div>
+        <div class="cat-hdr-text">
+          <div class="cat-hdr-label">KATEGORI COACHING</div>
+          <div class="cat-hdr-title">Merah</div>
+        </div>
+      </div>
+      <div class="cat-body">
+        <div class="cat-row">
+          <div class="cat-dot" style="background:#dc2626;"></div>
+          <div class="cat-row-text"><strong>Kondisi RO:</strong> Tidak ada kesadaran bahwa kinerjanya bermasalah. Tidak mau mengakui adanya kendala.</div>
+        </div>
+        <div class="cat-row">
+          <div class="cat-dot" style="background:#dc2626;"></div>
+          <div class="cat-row-text"><strong>Kondisi SPV:</strong> Tidak bisa menggali akar masalah. Sesi coaching tidak produktif — selesai tanpa kesimpulan yang berarti.</div>
+        </div>
+        <div class="cat-row">
+          <div class="cat-dot" style="background:#dc2626;"></div>
+          <div class="cat-row-text"><strong>Indikator:</strong> RO tidak bisa menjawab 3 dari 5 blok pertanyaan coaching secara substantif. RTL diisi asal-asalan.</div>
+        </div>
+        <div class="cat-consequence">
+          ⚠️ SPV mendapat perhatian khusus dari atasan. Dicatat sebagai faktor risiko dalam evaluasi efektivitas SPV. Jika Merah berlanjut 2 bulan → trigger evaluasi SPV.
+        </div>
+      </div>
+    </div>
+
+    <!-- KUNING -->
+    <div class="cat-card cat-kuning">
+      <div class="cat-hdr">
+        <div class="cat-icon">🟡</div>
+        <div class="cat-hdr-text">
+          <div class="cat-hdr-label">KATEGORI COACHING</div>
+          <div class="cat-hdr-title">Kuning</div>
+        </div>
+      </div>
+      <div class="cat-body">
+        <div class="cat-row">
+          <div class="cat-dot" style="background:#d97706;"></div>
+          <div class="cat-row-text"><strong>Kondisi RO:</strong> Ada upaya dan kemauan untuk membaik, tapi strategi yang dirancang belum tepat sasaran atau tidak realistis.</div>
+        </div>
+        <div class="cat-row">
+          <div class="cat-dot" style="background:#d97706;"></div>
+          <div class="cat-row-text"><strong>Kondisi SPV:</strong> Bisa menggali masalah, tapi belum mampu membantu RO merancang solusi yang konkret dan terukur.</div>
+        </div>
+        <div class="cat-row">
+          <div class="cat-dot" style="background:#d97706;"></div>
+          <div class="cat-row-text"><strong>Indikator:</strong> RO bisa menjawab 3–4 dari 5 blok pertanyaan. RTL ada tapi targetnya abstrak atau tidak ada timeline.</div>
+        </div>
+        <div class="cat-consequence">
+          📋 SPV perlu mengevaluasi strategi coaching dengan atasan langsung. Bulan depan SPV didampingi oleh PC dalam sesi coaching untuk perbaikan teknik.
+        </div>
+      </div>
+    </div>
+
+    <!-- HIJAU -->
+    <div class="cat-card cat-hijau">
+      <div class="cat-hdr">
+        <div class="cat-icon">🟢</div>
+        <div class="cat-hdr-text">
+          <div class="cat-hdr-label">KATEGORI COACHING</div>
+          <div class="cat-hdr-title">Hijau</div>
+        </div>
+      </div>
+      <div class="cat-body">
+        <div class="cat-row">
+          <div class="cat-dot" style="background:#059669;"></div>
+          <div class="cat-row-text"><strong>Kondisi RO:</strong> Memahami akar masalah. Memiliki motivasi untuk membaik. Merancang strategi yang spesifik dan terukur.</div>
+        </div>
+        <div class="cat-row">
+          <div class="cat-dot" style="background:#059669;"></div>
+          <div class="cat-row-text"><strong>Kondisi SPV:</strong> Berhasil menggali akar masalah. Membantu RO menyusun RTL yang realistis dengan target dan milestone jelas.</div>
+        </div>
+        <div class="cat-row">
+          <div class="cat-dot" style="background:#059669;"></div>
+          <div class="cat-row-text"><strong>Indikator:</strong> RO bisa menjawab semua 5 blok pertanyaan secara substantif. RTL memiliki target spesifik, timeline, dan ukuran keberhasilan.</div>
+        </div>
+        <div class="cat-consequence">
+          ✅ HO mencatat sebagai coaching efektif. SPV mendapat penilaian positif. Pantau apakah perbaikan terealisasi di bulan berikutnya.
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="callout c-warn">
+    <div class="callout-icon">⚠️</div>
+    <div>
+      <div class="callout-title">Area Evaluasi: Batas antara Kuning dan Merah Berpotensi Subjektif</div>
+      <div class="callout-text">
+        Juknis tidak mendefinisikan rubrik penilaian yang terukur untuk membedakan coaching "tidak ada strategi" (Merah) vs "ada strategi tapi belum tepat" (Kuning). Tanpa contoh narasi RTL untuk masing-masing kategori, HO dan SPV berpotensi memiliki standar yang berbeda-beda. <strong>Rekomendasi: tambahkan contoh RTL untuk skor 0, 50, 75, dan 100 sebagai lampiran Juknis.</strong>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════
+     TAB 3 — PANDUAN SPV
+══════════════════════════ -->
+<div class="content pad" id="tab2">
+
+  <div class="sec-title">Panduan Pelaksanaan Coaching untuk SPV</div>
+  <div class="sec-sub">Panduan praktis ini membantu SPV menjalankan coaching secara konsisten — baik untuk Yellow maupun Red Zone. Termasuk 5 blok pertanyaan yang harus dijawab dalam setiap sesi.</div>
+
+  <div class="guide-grid">
+
+    <!-- PANDUAN YELLOW -->
+    <div class="guide-card">
+      <div class="guide-hdr" style="background:#78350f;">
+        🟡 Panduan Coaching Yellow Zone
+      </div>
+      <div class="guide-body">
+        <div class="guide-step">
+          <div class="gs-num" style="background:#d97706;">1</div>
+          <div class="gs-text">
+            <div class="gs-title">Identifikasi KPI yang Bermasalah</div>
+            <div class="gs-desc">Tinjau mana dari 18 sub-KPI yang skornya paling rendah atau yang membutuhkan perhatian segera. Bukan membahas semua KPI sekaligus.</div>
+          </div>
+        </div>
+        <div class="guide-step">
+          <div class="gs-num" style="background:#d97706;">2</div>
+          <div class="gs-text">
+            <div class="gs-title">Gali Akar Masalah Spesifik</div>
+            <div class="gs-desc">Gunakan 5 blok pertanyaan (lihat di bawah). Fokus pada fakta dan kondisi aktual — hindari asumsi atau generalisasi.</div>
+          </div>
+        </div>
+        <div class="guide-step">
+          <div class="gs-num" style="background:#d97706;">3</div>
+          <div class="gs-text">
+            <div class="gs-title">Buat Rencana Aksi Konkret</div>
+            <div class="gs-desc">Setujui 2–3 langkah aksi yang spesifik dan terukur. Tetapkan target mingguan. Tidak perlu RTL tertulis formal untuk Yellow.</div>
+          </div>
+        </div>
+        <div class="guide-step">
+          <div class="gs-num" style="background:#d97706;">4</div>
+          <div class="gs-text">
+            <div class="gs-title">Input Hasil ke GForm HO</div>
+            <div class="gs-desc">Wajib diinput dalam 7 hari kerja sejak HO menerbitkan zona. Isi ringkasan sesi, akar masalah, dan aksi yang disepakati.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PANDUAN RED -->
+    <div class="guide-card">
+      <div class="guide-hdr" style="background:#7f1d1d;">
+        🔴 Panduan Coaching Red Zone / Override
+      </div>
+      <div class="guide-body">
+        <div class="guide-step">
+          <div class="gs-num" style="background:#dc2626;">1</div>
+          <div class="gs-text">
+            <div class="gs-title">Siapkan Data Sebelum Sesi</div>
+            <div class="gs-desc">Pull skor detail RO dari laporan. Identifikasi sub-KPI yang paling jauh dari target. Siapkan data absolut sebagai dasar diskusi — bukan opini.</div>
+          </div>
+        </div>
+        <div class="guide-step">
+          <div class="gs-num" style="background:#dc2626;">2</div>
+          <div class="gs-text">
+            <div class="gs-title">Jalankan Sesi dengan 5 Blok Pertanyaan</div>
+            <div class="gs-desc">Semua 5 blok wajib dijawab secara substantif. Dokumentasikan jawaban RO — ini akan menjadi dasar RTL dan kategorisasi HO.</div>
+          </div>
+        </div>
+        <div class="guide-step">
+          <div class="gs-num" style="background:#dc2626;">3</div>
+          <div class="gs-text">
+            <div class="gs-title">Susun RTL Tertulis Bersama</div>
+            <div class="gs-desc">RTL harus: (1) spesifik, (2) ada target angka, (3) ada timeline per KPI, (4) ada milestone mingguan. Ditandatangani RO dan SPV.</div>
+          </div>
+        </div>
+        <div class="guide-step">
+          <div class="gs-num" style="background:#dc2626;">4</div>
+          <div class="gs-text">
+            <div class="gs-title">Input GForm HO dalam 3 Hari Kerja</div>
+            <div class="gs-desc">Isi lengkap: ringkasan sesi, jawaban 5 blok, RTL yang disepakati. HO akan mengkategorisasi hasil sebagai Merah/Kuning/Hijau.</div>
+          </div>
+        </div>
+        <div class="guide-step">
+          <div class="gs-num" style="background:#dc2626;">5</div>
+          <div class="gs-text">
+            <div class="gs-title">Follow-up Mingguan (Tidak Formal)</div>
+            <div class="gs-desc">SPV pantau progress RTL setiap minggu — tidak perlu input GForm, cukup catat internal. Siap klarifikasi jika HO bertanya perkembangan.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- 5 BLOK PERTANYAAN -->
+  <div class="sec-title" style="margin-bottom:6px;">5 Blok Pertanyaan Wajib dalam Sesi Coaching</div>
+  <div class="sec-sub">Setiap sesi coaching Red Zone harus menjawab kelima blok ini secara substantif. Jawaban RO menjadi dasar RTL dan kategorisasi kualitas coaching oleh HO.</div>
+
+  <div class="q-blocks" style="max-width:760px;">
+    <div class="q-block">
+      <div class="q-num">B1</div>
+      <div class="q-content">
+        <div class="q-title">Kondisi Portofolio Aktual</div>
+        <div class="q-detail">Berapa total loan yang dipantau? Berapa yang bermasalah? Di KPI mana? Apa kondisi spesifik masing-masing kasus yang bermasalah?</div>
+        <div class="q-probe">Probe: "Dari KPI 1.1 yang bermasalah, kasus mana yang paling kritis dan kenapa belum terselesaikan?"</div>
+      </div>
+    </div>
+    <div class="q-block">
+      <div class="q-num">B2</div>
+      <div class="q-content">
+        <div class="q-title">Akar Masalah & Hambatan</div>
+        <div class="q-detail">Apa yang menyebabkan skor turun? Apakah hambatan dari debitur, instansi, sistem, atau faktor internal RO sendiri? Sudah ada upaya penyelesaian?</div>
+        <div class="q-probe">Probe: "Selain faktor eksternal, apa yang bisa RO lakukan sendiri tapi belum dilakukan?"</div>
+      </div>
+    </div>
+    <div class="q-block">
+      <div class="q-num">B3</div>
+      <div class="q-content">
+        <div class="q-title">Strategi & Rencana Konkret</div>
+        <div class="q-detail">Apa langkah spesifik yang akan RO ambil bulan ini? Berapa target mingguan? Kasus mana yang diprioritaskan? Apa ukuran keberhasilannya?</div>
+        <div class="q-probe">Probe: "Jika kasus A diselesaikan minggu ini, skor KPI 1.3 naik berapa poin?"</div>
+      </div>
+    </div>
+    <div class="q-block">
+      <div class="q-num">B4</div>
+      <div class="q-content">
+        <div class="q-title">Dukungan yang Dibutuhkan</div>
+        <div class="q-detail">Apa yang RO butuhkan dari SPV, PC, atau HO untuk menyelesaikan hambatan ini? Apakah ada eskalasi ke unit lain yang perlu didorong SPV?</div>
+        <div class="q-probe">Probe: "Kalau instansi tidak kooperatif, apakah sudah koordinasi dengan Loan Monitoring HO?"</div>
+      </div>
+    </div>
+    <div class="q-block">
+      <div class="q-num">B5</div>
+      <div class="q-content">
+        <div class="q-title">Komitmen & Motivasi</div>
+        <div class="q-detail">Apakah RO memahami dampak dari kondisi saat ini terhadap penilaian dan karier? Apakah RO berkomitmen pada RTL yang disusun bersama?</div>
+        <div class="q-probe">Probe: "Dari skala 1–10, seberapa yakin RO bisa mencapai target RTL bulan ini? Apa yang membuat tidak 10?"</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout c-green" style="margin-top:24px; max-width:760px;">
+    <div class="callout-icon">✅</div>
+    <div>
+      <div class="callout-title">Tanda Coaching yang Efektif (Kategori Hijau)</div>
+      <div class="callout-text">
+        RO keluar dari sesi dengan <strong>tahu persis apa yang harus dilakukan minggu ini</strong> — bukan sekadar "akan lebih rajin". RTL memiliki angka spesifik ("KPI 1.3 naik dari 78% ke 90% dengan cara X dalam 2 minggu"). SPV bisa menjelaskan akar masalah utama RO dalam satu kalimat tanpa membaca catatan.
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <span>Flow #4 — Mekanisme Coaching · Dari Zona ke Tindakan</span>
+  <span>Juknis KPI RO 2026 · Bank Woori Saudara · Rujukan: Bab V.1–V.3, V.5</span>
+</div>
+
+<script>
+function switchTab(idx) {
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', i===idx));
+  document.querySelectorAll('.content').forEach((c,i) => c.classList.toggle('active', i===idx));
+}
+</script>
+</body>
+</html>
